@@ -1,0 +1,7 @@
+saved_models
+__pycache__
+.DS_Store
+checkpoints
+.ipynb_checkpoints
+.idea
+cifar10
