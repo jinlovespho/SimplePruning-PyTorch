@@ -1,6 +1,8 @@
 # [Learning both Weights and Connections for Efficient Neural Networks](https://arxiv.org/abs/1506.02626)
 
-这份代码是题目中这篇论文的PyTorch版本的复现，论文内容是对CNN进行网络剪枝（network pruning），去除不重要的权重（weight），从而显著减小模型大小。
+## 内容说明
+
+这份代码是如题的这篇2015年论文的PyTorch版复现，论文内容是对CNN进行**网络剪枝**（network pruning），去除不重要的权重（weight），从而显著减小模型大小。论文作者在这篇论文的基础上加上量化（Quantization  ）和霍夫曼编码（Huffman Encoding ），在16年提出了为人熟知的三阶段方法——[Deep Compression](https://arxiv.org/abs/1510.00149)，前者是后者的初始版本。原仓库作者似乎把它们搞混了，为了和后者区分开来，我把仓库名改成了简单剪枝（Simple pruning）。
 
 我这份代码是fork过来的，原仓库为[DeepCompression-PyTorch](https://github.com/jack-willturner/DeepCompression-PyTorch)。在跑通的过程中，我修改了一些细枝末节的东西，同时根据自己的理解对关键代码加了一些中文注释，希望对研究阅读原代码和研究论文的人有所帮助。
 
@@ -30,9 +32,13 @@
 
 运行**prune.py**，会在**checkpoints**文件夹下得到多个**.t7文件**，分别是处于剪枝的不同阶段的模型权重。（同样，在运行之前可以把**finetune_steps**改小一点，先正常运行再说）
 
-### 代码实现的细节
+## 代码实现的细节
 
-1. 该仓库只能对**RestNet**和**宽ResNet**（见论文[Wide Residual Networks](https://arxiv.org/abs/1605.07146)）进行剪枝，暂不支持AlexNet等网络。
-2. 理论上随着剪枝比例的增加，模型的权重应该越来越少，因此剪枝过程生成的**.t7文件**会越来越小，但实际上并不会减小。这是因为权重存储在Tensor张量中，剪枝的过程只是将Tensor中的部分元素置为0，但是仍然占据着空间。pytorch保存权重的时候将每个Tensor视为一个对象，**只能整体保存，不能单独保存某几个元素的值**。如果想要真正实现模型压缩，需要考虑**稀疏矩阵**（参考**torch.sparse**）或者其他的方法。
-3. 
+1. 原论文（15年的）针对的LeNet、AlexNet和VGG-16，而该复现针对的是**RestNet**和**宽ResNet**（见论文[Wide Residual Networks](https://arxiv.org/abs/1605.07146)）进行剪枝。
+2. 理论上随着剪枝比例的增加，模型的权重应该越来越少，因此剪枝过程生成的**.t7文件**会越来越小，但实际上并不会减小。这是因为权重存储在**Tensor**张量中，剪枝的过程只是将Tensor中的部分元素置为0，但是仍然占据着空间。pytorch保存权重的时候将每个Tensor视为一个对象，**Tensor是稠密矩阵，只能整体保存，不能单独保存某几个元素的值**。如果想要真正实现模型压缩，需要考虑**稀疏矩阵**（参考**torch.sparse**）或者其他的方法。
+3. **权重阈值**的选择：
+   - 原论文的思路是设定一个权重的阈值，将低于这个阈值的权重被认为是不重要的，因此将被“剪掉”，但**原论文中并没有说明如何选择这个阈值**。
+   - 该复现采用的方法——是获取剩余的（未被剪掉）全部权重，取其**分位数**。例如：如果剪枝比例是50%，就取全部权重的中位数。
+
+4. 其他内容有时间再补。
 
