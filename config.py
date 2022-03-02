@@ -1,14 +1,14 @@
 from models import *
 
-DATA = './cifar10'  # cifar10数据集的路径
-CP = './checkpoints'  # checkpoint文件（.t7）的保存路径
+DATA = './cifar10'  # It is the folder that cifar10 will be saved.
+CP = './checkpoints'  # Please make the new 'checkpoints' folder. (.t7) files will be saved in this folder.
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def models(name):
-    """创建一个新模型
+    """create a new model
     Args:
-        name (string): 网络类型，从 resnet9、resnet18、resnet34、resnet50、wrn_40_2、wrn_16_2、wrn_40_1中选择
+        name (string): network type, choose from resnet9, resnet18, resnet34, resnet50, wrn_40_2, wrn_16_2, wrn_40_1
     """
     nets= {'resnet9'  : ResNet9(),
            'resnet18' : ResNet18(),
