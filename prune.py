@@ -1,11 +1,11 @@
-""" 剪枝(prune)及微调（再训练 retrain） """
+""" Pruning and fine-tuning (retraining) """
 
-# 外部库
+# external library
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 from tqdm import tqdm
 
-# 自定义
+# customize
 from utils import *
 import config
 
@@ -13,11 +13,11 @@ import config
 if __name__ == "__main__":
     model_name= 'resnet18'
     checkpoint = 'resnet18'
-    prune_checkpoint = ''  # 用于设置剪枝后模型的checkpoint文件名
-    save_every = 20  # 每 ”剪掉“一定百分比大小的权重，就进行一次验证
-    cutout = True  # 是否在原图像上挖洞
+    prune_checkpoint = ''  # used to set the checkpoint file name of the pruned model
+    save_every = 20  # Every time a certain percentage of the weight is "cut-off", a verification is performed
+    cutout = True  # Whether to cut holes in the original image
 
-    # 设置再训练（微调）参数
+    # Set retraining (fine-tuning) parameters
     finetune_steps = 1
     lr = 0.001
     weight_decay = 0.0005
@@ -27,8 +27,8 @@ if __name__ == "__main__":
     if 'wrn' in model_name:
         old_format = True
 
-    model = config.models(model_name)  # 新建空模型
-    model, sd = load_model(model, checkpoint, old_format)  # 加载预训练模型（权重）
+    model = config.models(model_name)  # create a new empty model
+    model, sd = load_model(model, checkpoint, old_format)  # load pretrained model (weights)
     device = config.DEVICE
     model.to(device)
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         weight_decay=weight_decay)
     criterion = nn.CrossEntropyLoss()
 
-    # 使学习率恢复到上次预训练结束时的状态
+    # Bring the learning rate back to what it was at the end of the last pretraining
     scheduler = lr_scheduler.CosineAnnealingLR(optimizer, 200, eta_min=1e-10)
     for epoch in range(sd['epoch']):
         scheduler.step()
@@ -53,8 +53,8 @@ if __name__ == "__main__":
         group['lr'] = scheduler.get_lr()[0]
 
     for prune_rate in tqdm(range(100)):
-        model = sparsify(model, prune_rate)  # 剪枝
-        finetune(model, train_loader, criterion, optimizer, finetune_steps)  # 再训练 (微调)
+        model = sparsify(model, prune_rate)  # prune
+        finetune(model, train_loader, criterion, optimizer, finetune_steps)  # retraining (fine tuning)
 
         if prune_rate % save_every == 0:
             checkpoint = prune_checkpoint + str(prune_rate)
