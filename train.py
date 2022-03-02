@@ -1,19 +1,20 @@
-""" 对模型进行预训练（pretrain），用于之后的剪枝（prune） """
 
-# 外部库
+""" Pretrain the model for later prune """
+
+# external library
 from __future__ import print_function
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 
-# 自定义
+# customize
 from utils import *
-from tqdm import tqdm  # 用于显示进度条
+from tqdm import tqdm  # Used to display the progress bar
 import config
 
 
 if __name__ == "__main__":
     model_name = 'resnet18'
-    checkpoint = 'resnet18'  # 保存的checkpoint文件的名称
+    checkpoint = 'resnet18'  # Name of the saved checkpoint file
     epochs = 2
     lr = 0.1
     lr_decay_ratio = 0.2
@@ -30,7 +31,7 @@ if __name__ == "__main__":
         lr=lr,
         momentum=momentum,
         weight_decay=weight_decay)
-    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, epochs, eta_min=1e-10)  # 使用 SGDR方法随 epoch调整 lr
+    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, epochs, eta_min=1e-10)  # use SGDR method to adjust lr with epoch
     criterion = nn.CrossEntropyLoss()
 
     global error_history
@@ -39,3 +40,5 @@ if __name__ == "__main__":
         train(model, train_loader, criterion, optimizer)
         validate(model, epoch, test_loader, criterion, checkpoint=checkpoint if epoch != 2 else checkpoint + '_init')
         scheduler.step()
+
+
