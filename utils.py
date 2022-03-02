@@ -6,7 +6,7 @@ import torchvision
 import torchvision.transforms as transforms
 import numpy as np
 
-# 自定义
+# customize
 import config
 
 
@@ -15,15 +15,15 @@ global error_history
 error_history = []
 
 
-class AverageMeter(object):
+class  AverageMeter ( object ):
     """Computes and stores the average and current value"""
 
     def __init__(self):
         self.reset()
 
     def reset(self):
-        self.val = 0
-        self.avg = 0
+        self . val  =  0
+        self . avg  =  0
         self.sum = 0
         self.count = 0
 
@@ -35,22 +35,22 @@ class AverageMeter(object):
 
 
 def get_cifar_loaders(data_loc=config.DATA, batch_size=128, cutout=True, n_holes=1, length=16):
-    """加载 cifar10数据集
+    """Load cifar10 dataset
     Args:
-        data_loc (str): cifar10数据集的位置。
-        cutout (bool): 如果为真，将对每张训练集图像都随机制造 n_holes个黑色正方形区域。
-        n_holes (int): 黑色正方形区域的数量，只在 cutout为真时生效。
+        data_loc (str): The location of the cifar10 dataset.
+        cutout (bool): If true, n_holes black squares will be randomly made for each training set image.
+        n_holes (int): The number of black square areas, only takes effect when cutout is true.
     """
     transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
+        transforms . ToTensor (),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),])
     if cutout:
         transform_train.transforms.append(Cutout(n_holes=n_holes, length=length))
 
     transform_test = transforms.Compose([
-        transforms.ToTensor(),
+        transforms . ToTensor (),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),])
 
     train_set = torchvision.datasets.CIFAR10(root=data_loc, train=True, download=False, transform=transform_train)
@@ -63,13 +63,13 @@ def get_cifar_loaders(data_loc=config.DATA, batch_size=128, cutout=True, n_holes
 
 
 def load_model(model, sd, old_format=False):
-    """加载预训练模型（权重）。
+    """Load pretrained model (weights).
     Args:
-        sd (str): 要加载的 checkpoint文件名，sd即 state dict。
-        old_format (bool): 用于加载一般格式的 checkpoint文件。
+        sd (str): The name of the checkpoint file to be loaded, sd is the state dict.
+        old_format (bool): Used to load checkpoint files in general format.
     Returns:
-        model: 加载过checkpoint文件的模型。
-        sd: 所加载checkpoint文件的内容。
+        model: The model loaded with the checkpoint file.
+        sd: The content of the loaded checkpoint file.
     """
     sd = torch.load('checkpoints/%s.t7' % sd, map_location='cpu')
     new_sd = model.state_dict()
@@ -78,7 +78,7 @@ def load_model(model, sd, old_format=False):
     else:
         old_sd = sd['net']
 
-    # 将所加载的模型的权重复制到新模型中
+    # Copy the weights of the loaded model to the new model
     if old_format:
         # this means the sd we are trying to load does not have masks and/or is named incorrectly
         keys_without_masks = [k for k in new_sd.keys() if 'mask' not in k]
@@ -87,7 +87,7 @@ def load_model(model, sd, old_format=False):
     else:
         new_names = [v for v in new_sd]
         old_names = [v for v in old_sd]
-        for i, j in enumerate(new_names):
+        for  i , j  in  enumerate ( new_names ):
             if not 'mask' in j:
                 new_sd[j] = old_sd[old_names[i]]
 
@@ -99,7 +99,7 @@ def load_model(model, sd, old_format=False):
         k_new = [k for k in new_sd.keys() if 'mask' not in k]
         k_new = [k for k in k_new if 'num_batches_tracked' not in k]
         for o, n in zip(old_sd.keys(), k_new):
-            new_sd[n] = old_sd[o]
+            new_sd [ n ] =  old_sd [ o ]
 
         model.load_state_dict(new_sd)
     return model, sd
@@ -111,24 +111,24 @@ def get_error(output, labels, topk=(1,)):
     batch_size = labels.size(0)
 
     _, pred = output.topk(max_k, 1, True, True)
-    pred = pred.t()
+    pred  =  pred . t ()
     correct = pred.eq(labels.view(1, -1).expand_as(pred))
 
-    res = []
+    res  = []
     for k in topk:
-        correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
+        correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
         res.append(100.0 - correct_k.mul_(100.0 / batch_size))
     return res
 
 
 def get_no_params(net):
-    """统计所有卷积层中非零权重的数量。"""
+    """Count the number of non-zero weights in all convolutional layers."""
     params = net
     total = 0
-    for p in params:
+    for  p  in  params :
         num = torch.sum(params[p] != 0)
         if 'conv' in p:
-            total += num
+            total  +=  num
     return total
 
 
@@ -144,14 +144,18 @@ def train(model, train_loader, criterion, optimizer):
         output = model(images)
         loss = criterion(output, labels)
 
-        # 计算 top1和 top5误差
+        # Calculate top1 and top5 errors
         err1, err5 = get_error(output.detach(), labels, topk=(1, 5))
+
+        print("err1: ", err1)
+        print("err5: ", err5)
+
 
         losses.update(loss.item(), images.size(0))
         top1.update(err1.item(), images.size(0))
         top5.update(err5.item(), images.size(0))
 
-        optimizer.zero_grad()
+        optimizer . zero_grad ()
         loss.backward()
         optimizer.step()
 
@@ -159,7 +163,7 @@ def train(model, train_loader, criterion, optimizer):
 def validate(model, epoch, val_loader, criterion, checkpoint=None):
     """
     Args:
-        checkpoint (str): 保存checkpoint文件的名称；如果没有，则不保存；默认不保存。
+        checkpoint (str): The name of the checkpoint file to save; if not, it will not be saved; the default is not saved.
     """
     global error_history
 
@@ -193,7 +197,7 @@ def validate(model, epoch, val_loader, criterion, checkpoint=None):
 def finetune(model, train_loader, criterion, optimizer, steps=100):
     model.train()
     data_iter = iter(train_loader)
-    for i in range(steps):
+    for  i  in  range ( steps ):
         try:
             images, labels = data_iter.next()
         except StopIteration:
@@ -205,7 +209,7 @@ def finetune(model, train_loader, criterion, optimizer, steps=100):
         output = model(images)
         loss = criterion(output, labels)
 
-        optimizer.zero_grad()
+        optimizer . zero_grad ()
         loss.backward()
         optimizer.step()
 
@@ -214,7 +218,7 @@ def expand_model(model, layers=torch.Tensor()):
 
     for layer in model.children():
         if len(list(layer.children())) > 0:
-            layers = expand_model(layer, layers)  # 递归，直到最底层
+            layers  =  expand_model ( layer , layers )   # recursively until the bottom
         else:
             if isinstance(layer, nn.Conv2d) and 'mask' not in layer._get_name():
                 layers = torch.cat((layers.view(-1), layer.weight.view(-1)))
@@ -222,27 +226,27 @@ def expand_model(model, layers=torch.Tensor()):
 
 
 def calculate_threshold(model, rate):
-    """计算权重阈值。
+    """Calculate the weight threshold.
     Args:
-        rate (float): 0~100, 剪枝的比例。
+        rate (float): 0~100, the ratio of pruning.
     Returns:
-        float: 阈值，小于该值的权重在剪枝时将被去除。
+        float: Threshold, weights smaller than this value will be removed during pruning.
     """
-    empty = torch.Tensor()  # 创建一个空 Tensor，目标权重将被加到里面
+    empty  =  torch .Tensor ()   # Create an empty Tensor to which target weights will be added
     if torch.cuda.is_available():
         empty = empty.cuda()
-    pre_abs = expand_model(model, empty)  # 获取所有未被裁剪的权重，得到一个一维 Tensor
-    weights = torch.abs(pre_abs)  # 取绝对值
+    pre_abs  =  expand_model ( model , empty )   # Get all uncropped weights and get a one-dimensional Tensor
+    weights  =  torch . abs ( pre_abs )   # take the absolute value
 
-    return np.percentile(weights.detach().cpu().numpy(), rate)  # 取所有权重的分位数（由百分数 rate决定）作为阈值
+    return  np . percentile ( weights . detach (). cpu (). numpy (), rate )   # Take the quantile of all weights (determined by the percentage rate) as the threshold
 
 
 def sparsify(model, prune_rate=50.):
-    """按给定比例进行剪枝。
+    """Prunes according to the given ratio.
     Args:
-        prune_rate (float): 剪枝的比例。
+        prune_rate (float): The ratio of prune.
     Returns:
-        剪枝后的模型。
+        The pruned model.
     """
     threshold = calculate_threshold(model, prune_rate)
     try:
@@ -253,10 +257,10 @@ def sparsify(model, prune_rate=50.):
 
 
 class Cutout(object):
-    """在一张图像上，随机制造一定数量的黑色正方形区域。
+    """A random number of black squares are created on an image.
     Args:
-        n_holes (int): 正方形区域的数量。
-        length (int): 正方形的边长。
+        n_holes (int): Number of square areas.
+        length (int): The side length of the square.
     """
 
     def __init__(self, n_holes, length):
@@ -266,9 +270,9 @@ class Cutout(object):
     def __call__(self, img):
         """
         Args:
-            img (Tensor): Tensor类型的图像，尺寸为 (C, H, W)。
+            img (Tensor): An image of type Tensor with dimensions (C, H, W).
         Returns:
-            Tensor: 带有 n_holes个正方形区域的图像，Tensor类型
+            Tensor: image with n_holes square area, Tensor type
         """
         h = img.size(1)
         w = img.size(2)
@@ -276,8 +280,8 @@ class Cutout(object):
         mask = np.ones((h, w), np.float32)
 
         for n in range(self.n_holes):
-            y = np.random.randint(h)
-            x = np.random.randint(w)
+            y  =  np . random . randint ( h )
+            x  =  np . random . randint ( w )
 
             y1 = np.clip(y - self.length // 2, 0, h)
             y2 = np.clip(y + self.length // 2, 0, h)
