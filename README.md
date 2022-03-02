@@ -17,7 +17,7 @@ Operating environment
 
 **Steps for usage**
 
-The original repository was run from the command line, probably Linux. The IDE I use is pycharm . For the convenience of debugging, I remove the command line and run the corresponding .py file directly in the IDE.
+The original repository was run from the command line, probably Linux. And I also did it in the Ubuntu operation and checked it works well.
 
 1. Prepare the cifar10 dataset
 Create a new folder cifar10 and checkpoints under the project, and put the downloaded cifar-10-python.tar.gz file in cifar10. (If you want to change the location, you can set the DATA in config.py yourself)
