@@ -1,18 +1,20 @@
 # [Learning both Weights and Connections for Efficient Neural Networks](https://arxiv.org/abs/1506.02626)
 
-Content description
+**Content description**
 This code is a reproduction of the PyTorch version of the 2015 paper as the title. The content of the paper is to perform network pruning on CNN to remove unimportant weights, thereby significantly reducing the size of the model. The author of the paper added Quantization and Huffman Encoding on the basis of this paper, and proposed a well-known three-stage method - Deep Compression in 2016. The former is the initial version of the latter. The author of the original repository seems to have confused them. To distinguish it from the latter, I changed the repository name to Simple pruning.
 
 My code is from fork, and the original warehouse is DeepCompression-PyTorch . In the process of running through, I modified some details, and added some Chinese comments to the key code according to my own understanding, hoping to help those who study the original code and research papers.
 
 Operating environment
-Windows 10
+* Windows 10
 
-Hardware: AMD R5 3600X + RTX2060 super (I used a single GPU, the original warehouse supports dual GPUs, I removed it to simplify the code)
+* Hardware: GeForce (I used a single GPU, the original warehouse supports dual GPUs, I removed it to simplify the code)
 
-pytorch1.2 GPU version (the original warehouse did not specify the version of PyTorch, I used 1.2)
+* pytorch 1.10.2+cu102 
+* CUDA 11.5
 
-Steps for usage
+
+**Steps for usage**
 The original repository was run from the command line, probably Linux. The IDE I use is pycharm . For the convenience of debugging, I remove the command line and run the corresponding .py file directly in the IDE.
 
 1. Prepare the cifar10 dataset
