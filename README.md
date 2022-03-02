@@ -1,6 +1,7 @@
 # [Learning both Weights and Connections for Efficient Neural Networks](https://arxiv.org/abs/1506.02626)
 
 **Content description**
+
 This code is a reproduction of the PyTorch version of the 2015 paper as the title. The content of the paper is to perform network pruning on CNN to remove unimportant weights, thereby significantly reducing the size of the model. The author of the paper added Quantization and Huffman Encoding on the basis of this paper, and proposed a well-known three-stage method - Deep Compression in 2016. The former is the initial version of the latter. The author of the original repository seems to have confused them. To distinguish it from the latter, I changed the repository name to Simple pruning.
 
 My code is from fork, and the original warehouse is DeepCompression-PyTorch . In the process of running through, I modified some details, and added some Chinese comments to the key code according to my own understanding, hoping to help those who study the original code and research papers.
