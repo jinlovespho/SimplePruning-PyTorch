@@ -50,7 +50,8 @@ Other content will be added in time.
 
 ## Test result :
 ### Terminal
-![image](https://user-images.githubusercontent.com/51250746/156700351-5b079399-ebf4-445f-825e-6a873127fbb9.png)
+![image](https://user-images.githubusercontent.com/51250746/156700558-e514b37f-2c46-4138-be72-644a0fe204bc.png)
+
 
 ### Graph
 ![image](https://user-images.githubusercontent.com/51250746/156700406-5e208821-b6ea-4520-b625-1e290943908c.png)
