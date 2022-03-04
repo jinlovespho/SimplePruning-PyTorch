@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 import numpy as np
@@ -34,7 +35,7 @@ class  AverageMeter ( object ):
         self.avg = self.sum / self.count
 
 
-def get_cifar_loaders(data_loc=config.DATA, batch_size=128, cutout=True, n_holes=1, length=16):
+def get_cifar_loaders(data_loc=config.DATA, batch_size=256, cutout=True, n_holes=1, length=16):
     """Load cifar10 dataset
     Args:
         data_loc (str): The location of the cifar10 dataset.
@@ -136,20 +137,19 @@ def train(model, train_loader, criterion, optimizer):
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
-
+    
     model.train()
+
+
     for i, (images, labels) in enumerate(train_loader):
         images, labels = images.to(device), labels.to(device)
 
         output = model(images)
+        
         loss = criterion(output, labels)
-
-        # Calculate top1 and top5 errors
+       
+       # Calculate top1 and top5 errors
         err1, err5 = get_error(output.detach(), labels, topk=(1, 5))
-
-        print("err1: ", err1)
-        print("err5: ", err5)
-
 
         losses.update(loss.item(), images.size(0))
         top1.update(err1.item(), images.size(0))
@@ -158,6 +158,9 @@ def train(model, train_loader, criterion, optimizer):
         optimizer . zero_grad ()
         loss.backward()
         optimizer.step()
+        
+
+    print("Finished Training")
 
 
 def validate(model, epoch, val_loader, criterion, checkpoint=None):
@@ -170,6 +173,10 @@ def validate(model, epoch, val_loader, criterion, checkpoint=None):
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
+    
+    """
+    avg_loss = 0
+    total_batch = len(val_loader)
 
     model.eval()
     for i, (images, labels) in enumerate(val_loader):
@@ -180,10 +187,42 @@ def validate(model, epoch, val_loader, criterion, checkpoint=None):
         err1, err5 = get_error(output.detach(), labels, topk=(1, 5))
 
         losses.update(loss.item(), images.size(0))
+
         top1.update(err1.item(), images.size(0))
         top5.update(err5.item(), images.size(0))
 
     error_history.append(top1.avg)
+    
+    print('Test loss: ', loss)
+    
+
+    avg_loss += loss / 5
+    print('Average of Test loss: ', avg_loss)
+    """
+  
+    test_loss = 0
+    correct = 0
+    total = 0
+
+    with torch.no_grad():
+      for data in val_loader:
+              images, labels = data
+              images, labels = images.to(device), labels.to(device)
+              outputs = model(images)
+              loss = criterion(outputs, labels)
+              
+              test_loss += loss.item()
+              _, predicted = torch.max(outputs.data, 1)
+              total += labels.size(0)
+              correct += (predicted == labels).sum().item()
+    print("correct: ", correct)
+    print("total: ", total)
+    
+
+    print("Accuracy of the network: ", 100.*correct/total, "%")
+
+
+
     if checkpoint:
         state = {
             'net': model.state_dict(),
@@ -195,7 +234,7 @@ def validate(model, epoch, val_loader, criterion, checkpoint=None):
 
 
 def finetune(model, train_loader, criterion, optimizer, steps=100):
-    model.train()
+    #model.train()     #To make the 'without retraining' after pruning
     data_iter = iter(train_loader)
     for  i  in  range ( steps ):
         try:
@@ -241,7 +280,7 @@ def calculate_threshold(model, rate):
     return  np . percentile ( weights . detach (). cpu (). numpy (), rate )   # Take the quantile of all weights (determined by the percentage rate) as the threshold
 
 
-def sparsify(model, prune_rate=50.):
+def sparsify(model, prune_rate):
     """Prunes according to the given ratio.
     Args:
         prune_rate (float): The ratio of prune.
