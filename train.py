@@ -15,8 +15,8 @@ import config
 if __name__ == "__main__":
     model_name = 'resnet18'
     checkpoint = 'resnet18'  # Name of the saved checkpoint file
-    epochs = 2
-    lr = 0.1
+    epochs = 35
+    lr = 0.02
     lr_decay_ratio = 0.2
     weight_decay = 0.0005
     momentum = 0.9
