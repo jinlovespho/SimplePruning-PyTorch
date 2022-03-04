@@ -14,13 +14,13 @@ if __name__ == "__main__":
     model_name= 'resnet18'
     checkpoint = 'resnet18'
     prune_checkpoint = ''  # used to set the checkpoint file name of the pruned model
-    save_every = 20  # Every time a certain percentage of the weight is "cut-off", a verification is performed
+    save_every = 5  # Every time a certain percentage of the weight is "cut-off", a verification is performed
     cutout = True  # Whether to cut holes in the original image
 
     # Set retraining (fine-tuning) parameters
-    finetune_steps = 1
+    finetune_steps = 10   # the number of iterative pruning
     lr = 0.001
-    weight_decay = 0.0005
+    weight_decay = 0.0005   # L2 regularization
     momentum = 0.9
 
     old_format = False
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     model.to(device)
 
     if prune_checkpoint == '':
-        prune_checkpoint = checkpoint + '_l1_'
+        prune_checkpoint = checkpoint + '_l2_'
     else:
         prune_checkpoint = prune_checkpoint
 
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     for group in optimizer.param_groups:
         group['lr'] = scheduler.get_lr()[0]
 
-    for prune_rate in tqdm(range(100)):
+    for prune_rate in [40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95]:
         model = sparsify(model, prune_rate)  # prune
         finetune(model, train_loader, criterion, optimizer, finetune_steps)  # retraining (fine tuning)
 
@@ -63,3 +63,5 @@ if __name__ == "__main__":
 
         if checkpoint:
             validate(model, prune_rate, test_loader, criterion, checkpoint=checkpoint)
+            print(checkpoint)
+            print("=========================")
