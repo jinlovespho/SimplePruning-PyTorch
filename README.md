@@ -48,7 +48,7 @@ The method used for this reproduction is to obtain all the remaining (not clippe
 Other content will be added in time.
 
 
-## Test result:
+## Test result :
 ### Terminal
 ![image](https://user-images.githubusercontent.com/51250746/156700351-5b079399-ebf4-445f-825e-6a873127fbb9.png)
 
