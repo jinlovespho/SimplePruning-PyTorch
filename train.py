@@ -11,12 +11,21 @@ from utils import *
 from tqdm import tqdm  # Used to display the progress bar
 import config
 
+import argparse 
+
+parser = argparse.ArgumentParser(description='jinlovespho simple pytorch pruning')
+parser.add_argument('--model', type=str, default='resnet18')
+parser.add_argument('--data_loc', type=str)
+parser.add_argument('--epochs', type=int)
+parser.add_argument('--lr', type=float )
+
+args = parser.parse_args()
 
 if __name__ == "__main__":
-    model_name = 'resnet18'
+    model_name = args.model
     checkpoint = 'resnet18'  # Name of the saved checkpoint file
-    epochs = 35
-    lr = 0.02
+    epochs = args.epochs
+    lr = args.lr 
     lr_decay_ratio = 0.2
     weight_decay = 0.0005
     momentum = 0.9

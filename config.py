@@ -1,6 +1,6 @@
 from models import *
 
-DATA = './cifar10'  # It is the folder that cifar10 will be saved.
+DATA = '/mnt/ssd2/dataset/CIFAR10'  # It is the folder that cifar10 will be saved.
 CP = './checkpoints'  # Please make the new 'checkpoints' folder. (.t7) files will be saved in this folder.
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
