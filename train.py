@@ -13,15 +13,19 @@ import config
 
 import argparse 
 
-parser = argparse.ArgumentParser(description='jinlovespho simple pytorch pruning')
-parser.add_argument('--model', type=str, default='resnet18')
-parser.add_argument('--data_loc', type=str)
-parser.add_argument('--epochs', type=int)
-parser.add_argument('--lr', type=float )
+def get_args():
+    parser = argparse.ArgumentParser(description='jinlovespho simple pytorch pruning')
+    parser.add_argument('--model', type=str, default='resnet18')
+    parser.add_argument('--data_loc', type=str)
+    parser.add_argument('--epochs', type=int)
+    parser.add_argument('--lr', type=float )
 
-args = parser.parse_args()
+    args = parser.parse_args()
+    
+    return args
 
 if __name__ == "__main__":
+    args = get_args()
     model_name = args.model
     checkpoint = 'resnet18'  # Name of the saved checkpoint file
     epochs = args.epochs
